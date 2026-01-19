@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
@@ -37,42 +38,52 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 1. Verificación de Seguridad: Sesión activa
+        // 1. SEGURIDAD: Verificar sesión antes de cargar nada más
         sessionManager = new SessionManager(this);
         String token = sessionManager.fetchAuthToken();
 
         if (token == null) {
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
+            irAlLogin();
             return;
         }
 
-        // 2. Configuración de Interfaz y EdgeToEdge
+        // 2. INTERFAZ: Configuración visual
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // Aplicar padding para barras de sistema (Insets)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        // Ajustar padding para barras de sistema
+        View mainView = findViewById(R.id.main);
+        if (mainView != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
+        }
 
-        // 3. Inicializar Vistas
+        // 3. VISTAS: Inicialización de componentes
         tvStatus = findViewById(R.id.tvStatus);
         btnEntrada = findViewById(R.id.btnEntrada);
         btnSalida = findViewById(R.id.btnSalida);
         btnEnviarIncidencia = findViewById(R.id.btnEnviarIncidencia);
         etIncidencia = findViewById(R.id.etIncidencia);
-        btnLogout = new Button(this); // (Opcional) Puedes añadirlo a tu XML
+        btnLogout = findViewById(R.id.btnLogout);
 
+        // 4. LÓGICA: ViewModel y GPS
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        // 4. Consultar estado inicial del trabajador
+        // Consultar estado inicial
         mainViewModel.consultarEstado(token);
 
-        // 5. Observadores (Arquitectura MVVM)
+        // 5. OBSERVADORES: Reaccionar a cambios en los datos
+        configurarObservadores();
+
+        // 6. EVENTOS: Configurar clics
+        configurarBotones(token);
+    }
+
+    private void configurarObservadores() {
         mainViewModel.getEstado().observe(this, estado -> {
             if (estado.isFichado()) {
                 tvStatus.setText("Estado: TRABAJANDO (Desde: " + estado.getUltimaEntrada() + ")");
@@ -87,23 +98,28 @@ public class MainActivity extends AppCompatActivity {
 
         mainViewModel.getMensajeExito().observe(this, msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
         mainViewModel.getError().observe(this, err -> Toast.makeText(this, err, Toast.LENGTH_LONG).show());
+    }
 
-        // 6. Eventos de botones
+    private void configurarBotones(String token) {
         btnEntrada.setOnClickListener(v -> obtenerUbicacionYFichar(token));
-
         btnSalida.setOnClickListener(v -> mainViewModel.ficharSalida(token));
 
         btnEnviarIncidencia.setOnClickListener(v -> {
-            String desc = etIncidencia.getText().toString();
+            String desc = etIncidencia.getText().toString().trim();
             if (!desc.isEmpty()) {
                 mainViewModel.enviarIncidencia(token, desc);
                 etIncidencia.setText("");
             }
         });
+
+        btnLogout.setOnClickListener(v -> {
+            sessionManager.logout();
+            irAlLogin();
+        });
     }
 
     private void obtenerUbicacionYFichar(String token) {
-        // Comprobar permisos GPS
+        // Verificar permisos
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
             return;
@@ -113,8 +129,13 @@ public class MainActivity extends AppCompatActivity {
             if (location != null) {
                 mainViewModel.ficharEntrada(token, location.getLatitude(), location.getLongitude());
             } else {
-                Toast.makeText(this, "No se pudo obtener la ubicación. Activa el GPS.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "No se pudo obtener ubicación. Activa el GPS.", Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void irAlLogin() {
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 }
