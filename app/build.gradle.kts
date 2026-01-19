@@ -54,6 +54,10 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("com.google.android.gms:play-services-maps:18.1.0")
 
+    // Retrofit y conversor GSON
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
     // Almacenamiento seguro del token JWT
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }
