@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.controldepresencia2026.MainActivity;
 import com.example.controldepresencia2026.R;
+import com.example.controldepresencia2026.utils.SessionManager;
 import com.example.controldepresencia2026.viewmodel.LoginViewModel;
 
 public class LoginActivity extends AppCompatActivity {
@@ -24,13 +25,17 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Inicializar vistas
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         progressBar = findViewById(R.id.progressBar);
 
+        // Inicializar SessionManager y ViewModel
+        SessionManager sessionManager = new SessionManager(this);
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
+        // Configurar evento de clic
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
@@ -42,14 +47,22 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Observador para el éxito del login
         loginViewModel.getLoginResponse().observe(this, response -> {
             progressBar.setVisibility(View.GONE);
-            // Aquí guardaremos el token más adelante
+
+            // Guardar el token JWT y el nombre del usuario de forma segura
+            sessionManager.saveAuthToken(response.getToken(), response.getUsuario());
+
             Toast.makeText(this, "Bienvenido " + response.getUsuario(), Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, MainActivity.class));
+
+            // Ir a la pantalla principal
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
             finish();
         });
 
+        // Observador para errores
         loginViewModel.getErrorMessage().observe(this, error -> {
             progressBar.setVisibility(View.GONE);
             Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
