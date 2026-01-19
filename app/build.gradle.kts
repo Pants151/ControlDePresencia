@@ -41,4 +41,19 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Retrofit para conectar con tu Flask en PythonAnywhere
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Arquitectura MVVM para Java (ViewModel y LiveData)
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.6.2")
+
+    // Servicios de Ubicación y Mapas
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+
+    // Almacenamiento seguro del token JWT
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }
