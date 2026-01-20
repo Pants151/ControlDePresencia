@@ -38,6 +38,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        TextView tvWelcome = findViewById(R.id.tvWelcome);
+        String nombreUsuario = sessionManager.fetchUserName(); // Asegúrate de añadir este método en SessionManager o usar el valor guardado
+        if (nombreUsuario != null) {
+            tvWelcome.setText("Hola, " + nombreUsuario);
+        }
+
         // 1. SEGURIDAD: Verificar sesión antes de cargar nada más
         sessionManager = new SessionManager(this);
         String token = sessionManager.fetchAuthToken();

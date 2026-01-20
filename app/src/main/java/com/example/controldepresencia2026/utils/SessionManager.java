@@ -10,7 +10,7 @@ import java.security.GeneralSecurityException;
 public class SessionManager {
     private static final String PREF_NAME = "secure_prefs";
     private static final String KEY_TOKEN = "jwt_token";
-    private static final String KEY_USER_NAME = "user_name";
+    private static final String KEY_USER_NAME = "user_name"; //
 
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -31,19 +31,20 @@ public class SessionManager {
         }
     }
 
-    // Guardar token y nombre al loguearse
     public void saveAuthToken(String token, String userName) {
         editor.putString(KEY_TOKEN, token);
-        editor.putString(KEY_USER_NAME, userName);
+        editor.putString(KEY_USER_NAME, userName); // Guardamos el nombre
         editor.apply();
     }
 
-    // Obtener el token para las peticiones API
     public String fetchAuthToken() {
         return sharedPreferences.getString(KEY_TOKEN, null);
     }
 
-    // Borrar sesión (Logout)
+    public String fetchUserName() {
+        return sharedPreferences.getString(KEY_USER_NAME, "Usuario");
+    }
+
     public void logout() {
         editor.clear();
         editor.apply();
