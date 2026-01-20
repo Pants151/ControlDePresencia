@@ -45,14 +45,21 @@ public class MainViewModel extends ViewModel {
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
                 if (response.isSuccessful()) {
                     mensajeExito.setValue(response.body().getMsg());
-                    consultarEstado(token); // Refrescar estado
+                    consultarEstado(token);
                 } else {
-                    error.setValue("Error en entrada: Estás fuera de rango o ya fichaste.");
+                    // LEER EL ERROR REAL DEL SERVIDOR
+                    try {
+                        String errorJson = response.errorBody().string();
+                        // Esto mostrará si es "Fuera de radio" o "Entrada activa"
+                        error.setValue("Error Servidor: " + errorJson);
+                    } catch (Exception e) {
+                        error.setValue("Error desconocido");
+                    }
                 }
             }
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
-                error.setValue("Error de red: " + t.getMessage());
+                error.setValue("Fallo de red: " + t.getMessage());
             }
         });
     }
@@ -81,11 +88,15 @@ public class MainViewModel extends ViewModel {
         RetrofitClient.getApiService().registrarIncidencia("Bearer " + token, body).enqueue(new Callback<BasicResponse>() {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
-                if (response.isSuccessful()) mensajeExito.setValue("Incidencia enviada");
+                if (response.isSuccessful()) {
+                    mensajeExito.setValue("Incidencia enviada correctamente");
+                } else {
+                    error.setValue("Error al enviar: Código " + response.code());
+                }
             }
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
-                error.setValue("Error al enviar incidencia");
+                error.setValue("Fallo de red: " + t.getMessage());
             }
         });
     }
