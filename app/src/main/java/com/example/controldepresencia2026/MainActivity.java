@@ -38,13 +38,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TextView tvWelcome = findViewById(R.id.tvWelcome);
-        String nombreUsuario = sessionManager.fetchUserName(); // Asegúrate de añadir este método en SessionManager o usar el valor guardado
-        if (nombreUsuario != null) {
-            tvWelcome.setText("Hola, " + nombreUsuario);
-        }
-
-        // 1. SEGURIDAD: Verificar sesión antes de cargar nada más
+        // 1. SEGURIDAD: Inicializar SessionManager y verificar el token antes de nada
         sessionManager = new SessionManager(this);
         String token = sessionManager.fetchAuthToken();
 
@@ -53,11 +47,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // 2. INTERFAZ: Configuración visual
+        // 2. INTERFAZ: Configuración visual y carga del Layout
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main); // Esto DEBE ir antes de los findViewById
 
-        // Ajustar padding para barras de sistema
+        // Ajustar padding para barras de sistema (status bar, navigation bar)
         View mainView = findViewById(R.id.main);
         if (mainView != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainView, (v, insets) -> {
@@ -67,7 +61,8 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        // 3. VISTAS: Inicialización de componentes
+        // 3. VISTAS: Inicialización de componentes (incluyendo el saludo)
+        TextView tvWelcome = findViewById(R.id.tvWelcome);
         tvStatus = findViewById(R.id.tvStatus);
         btnEntrada = findViewById(R.id.btnEntrada);
         btnSalida = findViewById(R.id.btnSalida);
@@ -75,17 +70,23 @@ public class MainActivity extends AppCompatActivity {
         etIncidencia = findViewById(R.id.etIncidencia);
         btnLogout = findViewById(R.id.btnLogout);
 
-        // 4. LÓGICA: ViewModel y GPS
+        // Configurar el mensaje de bienvenida con el nombre guardado
+        String nombreUsuario = sessionManager.fetchUserName();
+        if (nombreUsuario != null) {
+            tvWelcome.setText("Hola, " + nombreUsuario);
+        }
+
+        // 4. LÓGICA: Inicializar servicios de Google y ViewModel
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        // Consultar estado inicial
+        // Consultar si el trabajador ya tiene un fichaje abierto en el servidor
         mainViewModel.consultarEstado(token);
 
-        // 5. OBSERVADORES: Reaccionar a cambios en los datos
+        // 5. OBSERVADORES: Configurar la escucha de cambios en los LiveData
         configurarObservadores();
 
-        // 6. EVENTOS: Configurar clics
+        // 6. EVENTOS: Configurar los clics de los botones
         configurarBotones(token);
     }
 
