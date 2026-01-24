@@ -20,7 +20,7 @@ public interface ApiService {
     @GET("api/presencia/estado")
     Call<EstadoResponse> obtenerEstado(@Header("Authorization") String token);
 
-    // Para incidencias, usaremos un Map o una clase simple para el JSON {"descripcion": "..."}
+    // Para incidencias, usaremos un Map o una clase simple para el JSON
     @POST("api/incidencias")
     Call<BasicResponse> registrarIncidencia(@Header("Authorization") String token, @Body java.util.Map<String, String> body);
 }
