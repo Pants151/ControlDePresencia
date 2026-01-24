@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary">#2C3E50</color>
+    <color name="primary_light">#34495E</color>
+    <color name="accent">#3498DB</color>
+
+    <color name="success">#27AE60</color>
+    <color name="danger">#E74C3C</color>
+    <color name="warning">#F39C12</color>
+
+    <color name="background">#F4F7F6</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_surface">#2C3E50</color>
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

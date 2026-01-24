@@ -1,60 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center_horizontal">
+    android:background="@color/background"
+    android:padding="16dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@color/primary"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/tvWelcome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hola, Usuario"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Estado: Consultando..."
+                android:textColor="#BDC3C7"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        android:layout_marginBottom="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <Button
+                android:id="@+id/btnEntrada"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="Fichar Entrada"
+                android:backgroundTint="@color/success"
+                android:textSize="18sp"
+                app:cornerRadius="12dp"
+                app:icon="@android:drawable/ic_input_add"
+                android:layout_marginBottom="12dp"/>
+
+            <Button
+                android:id="@+id/btnSalida"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="Fichar Salida"
+                android:backgroundTint="@color/danger"
+                android:textSize="18sp"
+                app:cornerRadius="12dp"
+                app:icon="@android:drawable/ic_lock_power_off"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
-        android:id="@+id/tvWelcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hola, Usuario"
-        android:textSize="20sp"
+        android:text="Reportar Incidencia"
         android:textStyle="bold"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="4dp"/>
 
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Estado: Consultando..."
-        android:textSize="18sp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="30dp" />
-
-    <Button
-        android:id="@+id/btnEntrada"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Fichar Entrada"
-        android:backgroundTint="#4CAF50"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="8dp">
 
-    <Button
-        android:id="@+id/btnSalida"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Fichar Salida"
-        android:backgroundTint="#F44336"
-        android:layout_marginBottom="40dp"
-        android:visibility="gone"/>
-
-    <EditText
-        android:id="@+id/etIncidencia"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Describa una incidencia..."
-        android:inputType="textMultiLine"
-        android:lines="3" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etIncidencia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Describa el problema..."
+            android:inputType="textMultiLine"
+            android:lines="3"
+            android:gravity="top" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnEnviarIncidencia"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Enviar Incidencia" />
+        android:text="Enviar Incidencia"
+        style="@style/Widget.Material3.Button.ElevatedButton"/>
 
     <Space
         android:layout_width="match_parent"
@@ -63,10 +115,10 @@
 
     <Button
         android:id="@+id/btnLogout"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="wrap_content"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cerrar Sesión"
-        android:textColor="@android:color/holo_red_dark" />
+        android:textColor="@color/danger" />
 
 </LinearLayout>
