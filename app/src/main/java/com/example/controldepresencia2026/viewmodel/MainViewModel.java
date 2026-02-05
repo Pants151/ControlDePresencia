@@ -65,15 +65,21 @@ public class MainViewModel extends ViewModel {
     }
 
     // Fichar Salida
-    public void ficharSalida(String token) {
-        RetrofitClient.getApiService().registrarSalida("Bearer " + token).enqueue(new Callback<BasicResponse>() {
+    public void ficharSalida(String token, double lat, double lng) {
+        // Creamos el objeto con las coordenadas actuales
+        LocationData location = new LocationData(lat, lng);
+
+        RetrofitClient.getApiService().registrarSalida("Bearer " + token, location).enqueue(new Callback<BasicResponse>() {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     mensajeExito.setValue(response.body().getMsg());
                     consultarEstado(token);
+                } else {
+                    error.setValue("Error al salir: " + response.code());
                 }
             }
+
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
                 error.setValue("Error de red: " + t.getMessage());

@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void configurarBotones(String token) {
         btnEntrada.setOnClickListener(v -> obtenerUbicacionYFichar(token));
-        btnSalida.setOnClickListener(v -> mainViewModel.ficharSalida(token));
+        btnSalida.setOnClickListener(v -> obtenerUbicacionYFicharSalida(token));
 
         btnEnviarIncidencia.setOnClickListener(v -> {
             String desc = etIncidencia.getText().toString().trim();
@@ -137,6 +137,24 @@ public class MainActivity extends AppCompatActivity {
                 mainViewModel.ficharEntrada(token, location.getLatitude(), location.getLongitude());
             } else {
                 Toast.makeText(this, "No se pudo obtener ubicación. Activa el GPS.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void obtenerUbicacionYFicharSalida(String token) {
+        // Verificar permisos (Igual que en la entrada)
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+            return;
+        }
+
+        // Obtener la última ubicación conocida
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                // Llamamos al ViewModel pasando las coordenadas
+                mainViewModel.ficharSalida(token, location.getLatitude(), location.getLongitude());
+            } else {
+                Toast.makeText(this, "No se pudo obtener ubicación. Activa el GPS para salir.", Toast.LENGTH_LONG).show();
             }
         });
     }

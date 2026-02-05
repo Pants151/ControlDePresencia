@@ -14,6 +14,7 @@ public interface ApiService {
     @POST("api/presencia/entrada")
     Call<BasicResponse> registrarEntrada(@Header("Authorization") String token, @Body LocationData location);
 
+    @POST("api/presencia/salida")
     Call<BasicResponse> registrarSalida(@Header("Authorization") String token, @Body LocationData location);
 
     @GET("api/presencia/estado")
