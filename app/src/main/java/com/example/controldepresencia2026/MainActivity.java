@@ -1,9 +1,11 @@
 package com.example.controldepresencia2026;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -51,11 +53,14 @@ public class MainActivity extends AppCompatActivity {
 
     private MapView map = null;
 
+    private NfcAdapter nfcAdapter;
+    private PendingIntent pendingIntent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // SEGURIDAD: Inicializar SessionManager y verificar el token
+        // Inicializar SessionManager y verificar el token
         sessionManager = new SessionManager(this);
         String token = sessionManager.fetchAuthToken();
 
@@ -64,10 +69,10 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // --- CONFIGURACIÓN OSMDROID ---
+        // CONFIGURACIÓN OSMDROID
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-        // 2. INTERFAZ: Configuración visual y carga del Layout
+        // Configuración visual y carga del Layout
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
@@ -81,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        // 3. VISTAS: Inicialización de componentes
+        // Inicialización de componentes
         TextView tvWelcome = findViewById(R.id.tvWelcome);
         tvStatus = findViewById(R.id.tvStatus);
         btnEntrada = findViewById(R.id.btnEntrada);
@@ -103,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
             tvWelcome.setText("Hola, " + nombreUsuario);
         }
 
-        // 4. LÓGICA: Inicializar servicios y cargar datos
+        // Inicializar servicios y cargar datos
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
@@ -113,6 +118,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Cargar configuración de la empresa (Ubicación y Radio)
         cargarConfiguracionYMapa(token);
+
+        // Inicializar adaptador NFC
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (nfcAdapter == null) {
+            Toast.makeText(this, "Este dispositivo no soporta NFC", Toast.LENGTH_LONG).show();
+        }
+
+        // Crear el PendingIntent para capturar el tag cuando la app esté abierta
+        Intent intent = new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE);
     }
 
     private void cargarConfiguracionYMapa(String token) {
@@ -160,17 +175,44 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Ciclo de vida del Mapa
+    // Ciclo de vida del Mapa y NFC
     @Override
     public void onResume() {
         super.onResume();
         if (map != null) map.onResume();
+        if (nfcAdapter != null) {
+            nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         if (map != null) map.onPause();
+        if (nfcAdapter != null) {
+            nfcAdapter.disableForegroundDispatch(this);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction()) ||
+                NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+
+            Toast.makeText(this, "NFC Detectado: Procesando fichaje...", Toast.LENGTH_SHORT).show();
+
+            // Obtenemos el token de la sesión
+            String token = sessionManager.fetchAuthToken();
+
+            // Lógica: Si está fichado, hacemos salida. Si no, hacemos entrada.
+            if (mainViewModel.getEstado().getValue() != null && mainViewModel.getEstado().getValue().isFichado()) {
+                obtenerUbicacionYFicharSalida(token);
+            } else {
+                obtenerUbicacionYFichar(token);
+            }
+        }
     }
 
     private void configurarObservadores() {
