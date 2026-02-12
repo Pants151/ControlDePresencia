@@ -6,6 +6,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import java.util.Map;
 
 public interface ApiService {
     @POST("api/auth/login")
@@ -20,7 +21,11 @@ public interface ApiService {
     @GET("api/presencia/estado")
     Call<EstadoResponse> obtenerEstado(@Header("Authorization") String token);
 
-    // Para incidencias, usaremos un Map o una clase simple para el JSON
+    // Para incidencias
     @POST("api/incidencias")
     Call<BasicResponse> registrarIncidencia(@Header("Authorization") String token, @Body java.util.Map<String, String> body);
+
+    // MÉTODO PARA EL MAPA
+    @GET("api/empresa/config")
+    Call<Map<String, Object>> obtenerConfigEmpresa(@Header("Authorization") String token);
 }

@@ -121,4 +121,10 @@
         android:text="Cerrar Sesión"
         android:textColor="@color/danger" />
 
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>

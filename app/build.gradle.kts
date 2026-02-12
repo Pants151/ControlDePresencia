@@ -60,4 +60,7 @@ dependencies {
 
     // Almacenamiento seguro del token JWT
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // Mapa OSMDroid (OpenStreetMap para Android)
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
 }
