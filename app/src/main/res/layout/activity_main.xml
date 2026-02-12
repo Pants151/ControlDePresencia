@@ -38,9 +38,17 @@
                 android:textColor="#BDC3C7"
                 android:layout_marginTop="4dp"
                 android:textSize="14sp" />
+            <TextView
+                android:id="@+id/tvResumen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Cargando resumen mensual..."
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textStyle="italic" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

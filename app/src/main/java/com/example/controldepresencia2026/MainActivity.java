@@ -46,8 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private MainViewModel mainViewModel;
     private SessionManager sessionManager;
     private FusedLocationProviderClient fusedLocationClient;
-
-    private TextView tvStatus;
+    private TextView tvStatus, tvResumen;
     private Button btnEntrada, btnSalida, btnEnviarIncidencia, btnLogout;
     private EditText etIncidencia;
 
@@ -89,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
         // Inicialización de componentes
         TextView tvWelcome = findViewById(R.id.tvWelcome);
         tvStatus = findViewById(R.id.tvStatus);
+        tvResumen = findViewById(R.id.tvResumen);
         btnEntrada = findViewById(R.id.btnEntrada);
         btnSalida = findViewById(R.id.btnSalida);
         btnEnviarIncidencia = findViewById(R.id.btnEnviarIncidencia);
@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         mainViewModel.consultarEstado(token);
+        mainViewModel.consultarResumen(token);
         configurarObservadores();
         configurarBotones(token);
 
@@ -180,7 +181,9 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         if (map != null) map.onResume();
-        if (nfcAdapter != null) {
+
+        // El if es vital para que el emulador no explote al no tener NFC
+        if (nfcAdapter != null && pendingIntent != null) {
             nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
         }
     }
@@ -189,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         if (map != null) map.onPause();
+
         if (nfcAdapter != null) {
             nfcAdapter.disableForegroundDispatch(this);
         }
@@ -225,6 +229,23 @@ public class MainActivity extends AppCompatActivity {
                 tvStatus.setText("Estado: FUERA DE SERVICIO");
                 btnEntrada.setVisibility(View.VISIBLE);
                 btnSalida.setVisibility(View.GONE);
+            }
+        });
+
+        // OBSERVADOR PARA EL RESUMEN
+        mainViewModel.getResumenMensual().observe(this, resumen -> {
+            if (resumen != null) {
+                String trabajadoStr = formatearHoras(resumen.getHorasTrabajadas());
+                String teoricoStr = formatearHoras(resumen.getHorasTeoricas());
+                String extrasStr = formatearHoras(resumen.getHorasExtra());
+
+                String texto = String.format("Mes: %s\nTrabajado: %s\nTeórico: %s\nExtras: %s",
+                        resumen.getMes(),
+                        trabajadoStr,
+                        teoricoStr,
+                        extrasStr);
+
+                tvResumen.setText(texto);
             }
         });
 
@@ -279,9 +300,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
     private void irAlLogin() {
         startActivity(new Intent(this, LoginActivity.class));
         finish();
+    }
+    private String formatearHoras(double horasDecimales) {
+        int horas = (int) horasDecimales;
+        int minutos = (int) Math.round((horasDecimales - horas) * 60);
+
+        // Si los minutos redondean a 60, ajustamos las horas
+        if (minutos == 60) {
+            horas++;
+            minutos = 0;
+        }
+
+        return horas + "h " + minutos + "min";
     }
 }

@@ -6,6 +6,8 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
+
 import java.util.Map;
 
 public interface ApiService {
@@ -25,7 +27,13 @@ public interface ApiService {
     @POST("api/incidencias")
     Call<BasicResponse> registrarIncidencia(@Header("Authorization") String token, @Body java.util.Map<String, String> body);
 
-    // MÉTODO PARA EL MAPA
+    // PARA EL MAPA
     @GET("api/empresa/config")
     Call<Map<String, Object>> obtenerConfigEmpresa(@Header("Authorization") String token);
+
+    @GET("api/presencia/resumen-mensual")
+    Call<ResumenResponse> obtenerResumenMensual(
+            @Header("Authorization") String token,
+            @Query("mes") String mes
+    );
 }

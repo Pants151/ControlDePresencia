@@ -18,10 +18,12 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<EstadoResponse> estado = new MutableLiveData<>();
     private MutableLiveData<String> mensajeExito = new MutableLiveData<>();
     private MutableLiveData<String> error = new MutableLiveData<>();
+    private MutableLiveData<ResumenResponse> resumenMensual = new MutableLiveData<>();
 
     public LiveData<EstadoResponse> getEstado() { return estado; }
     public LiveData<String> getMensajeExito() { return mensajeExito; }
     public LiveData<String> getError() { return error; }
+    public LiveData<ResumenResponse> getResumenMensual() { return resumenMensual; }
 
     // Obtener si el trabajador ya ha fichado hoy
     public void consultarEstado(String token) {
@@ -35,6 +37,19 @@ public class MainViewModel extends ViewModel {
                 error.setValue("Fallo al consultar estado: " + t.getMessage());
             }
         });
+    }
+
+    // Obtener resumen mensual
+    public void consultarResumen(String token) {
+        RetrofitClient.getApiService().obtenerResumenMensual("Bearer " + token, null)
+                .enqueue(new Callback<ResumenResponse>() {
+                    @Override
+                    public void onResponse(Call<ResumenResponse> call, Response<ResumenResponse> response) {
+                        if (response.isSuccessful()) resumenMensual.setValue(response.body());
+                    }
+                    @Override
+                    public void onFailure(Call<ResumenResponse> call, Throwable t) {}
+                });
     }
 
     // Fichar Entrada con GPS
@@ -75,6 +90,7 @@ public class MainViewModel extends ViewModel {
                 if (response.isSuccessful() && response.body() != null) {
                     mensajeExito.setValue(response.body().getMsg());
                     consultarEstado(token);
+                    consultarResumen(token);
                 } else {
                     error.setValue("Error al salir: " + response.code());
                 }
