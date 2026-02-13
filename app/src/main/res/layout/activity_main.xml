@@ -121,36 +121,18 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <Button
-        android:id="@+id/btnAdmin"
+    <Space
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="#455A64"
-        android:text="PANEL DE ADMINISTRACIÓN"
-        android:textColor="@android:color/white"
-        android:visibility="gone" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <Button
-        android:id="@+id/btnChangePassword"
-        style="@style/Widget.Material3.Button.TextButton"
+        android:id="@+id/btnConfig"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Cambiar Contraseña"
-        android:textColor="@color/primary" />
-
-    <Button
-        android:id="@+id/btnLogout"
-        style="@style/Widget.Material3.Button.TextButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Cerrar Sesión"
-        android:textColor="@color/danger" />
-
-    <org.osmdroid.views.MapView
-        android:id="@+id/map"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginTop="16dp" />
+        android:text="Configuración"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        app:icon="@android:drawable/ic_menu_preferences"
+        android:layout_marginBottom="16dp"/>
 
 </LinearLayout>

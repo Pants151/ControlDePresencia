@@ -1,6 +1,8 @@
 package com.example.controldepresencia2026;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -35,6 +37,7 @@ import com.example.controldepresencia2026.viewmodel.MainViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
@@ -53,10 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private FusedLocationProviderClient fusedLocationClient;
     private TextView tvStatus, tvResumen;
-    private Button btnEntrada, btnSalida, btnEnviarIncidencia, btnLogout, btnChangePassword;
+    private Button btnEntrada, btnSalida, btnEnviarIncidencia, btnConfig;
     private EditText etIncidencia;
-
-    private MapView map = null;
 
     private NfcAdapter nfcAdapter;
     private PendingIntent pendingIntent;
@@ -67,33 +68,24 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        // Crear canal de notificaciones
+        createNotificationChannel();
+
+        // Pedir permiso de notificaciones en Android 13+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this,
+                    Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.POST_NOTIFICATIONS }, 101);
+            }
+        }
+
         // Inicializar SessionManager y verificar el token
         sessionManager = new SessionManager(this);
         String token = sessionManager.fetchAuthToken();
         String rol = sessionManager.fetchUserRol();
-        // DEBUG: Mostrar el rol actual para ver por qué no sale el botón
-        Toast.makeText(this, "Rol detectado: " + rol, Toast.LENGTH_LONG).show();
 
-        Button btnAdmin = findViewById(R.id.btnAdmin);
-
-        if (token == null) {
-            irAlLogin();
-            return;
-        }
-
-        if ("Administrador".equals(rol) || "Superadministrador".equals(rol)) {
-            btnAdmin.setVisibility(View.VISIBLE);
-        } else {
-            btnAdmin.setVisibility(View.GONE);
-        }
-
-        btnAdmin.setOnClickListener(v -> {
-            Intent i = new Intent(this, AdminActivity.class);
-            startActivity(i);
-        });
-
-        // CONFIGURACIÓN OSMDROID
-        Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
+        // CONFIGURACIÓN OSMDROID NO NECESARIA AQUI YA
+        // Configuration.getInstance().load(...) se movió a ConfigActivity
 
         // Ajustar padding para barras de sistema
 
@@ -115,15 +107,12 @@ public class MainActivity extends AppCompatActivity {
         btnSalida = findViewById(R.id.btnSalida);
         btnEnviarIncidencia = findViewById(R.id.btnEnviarIncidencia);
         etIncidencia = findViewById(R.id.etIncidencia);
-        btnLogout = findViewById(R.id.btnLogout);
-        btnChangePassword = findViewById(R.id.btnChangePassword);
+        btnConfig = findViewById(R.id.btnConfig);
 
-        // Inicializar el Mapa
-        map = findViewById(R.id.map);
-        if (map != null) {
-            map.setTileSource(TileSourceFactory.MAPNIK);
-            map.setMultiTouchControls(true);
-        }
+        // Configuración botón configuración
+        btnConfig.setOnClickListener(v -> {
+            startActivity(new Intent(this, com.example.controldepresencia2026.view.ConfigActivity.class));
+        });
 
         // Configurar el mensaje de bienvenida
         String nombreUsuario = sessionManager.fetchUserName();
@@ -140,9 +129,6 @@ public class MainActivity extends AppCompatActivity {
         configurarObservadores();
         configurarBotones(token);
 
-        // Cargar configuración de la empresa (Ubicación y Radio)
-        cargarConfiguracionYMapa(token);
-
         // Inicializar adaptador NFC
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
@@ -152,62 +138,39 @@ public class MainActivity extends AppCompatActivity {
         // Crear el PendingIntent para capturar el tag cuando la app esté abierta
         Intent intent = new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE);
-    }
 
-    private void cargarConfiguracionYMapa(String token) {
-        if (map == null)
-            return;
+        // ACTUALIZAR TOKEN FCM
+        try {
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                if (!task.isSuccessful()) {
+                    return;
+                }
+                String fcmToken = task.getResult();
+                Map<String, String> body = new HashMap<>();
+                body.put("fcm_token", fcmToken);
 
-        RetrofitClient.getApiService().obtenerConfigEmpresa("Bearer " + token)
-                .enqueue(new Callback<Map<String, Object>>() {
-                    @Override
-                    public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            try {
-                                double lat = ((Number) response.body().get("lat")).doubleValue();
-                                double lng = ((Number) response.body().get("lng")).doubleValue();
-                                double radio = ((Number) response.body().get("radio")).doubleValue();
-
-                                GeoPoint startPoint = new GeoPoint(lat, lng);
-                                map.getController().setZoom(17.5);
-                                map.getController().setCenter(startPoint);
-
-                                // Añadir Marcador
-                                Marker startMarker = new Marker(map);
-                                startMarker.setPosition(startPoint);
-                                startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                                startMarker.setTitle("Sede de la Empresa");
-                                map.getOverlays().add(startMarker);
-
-                                // Dibujar el Radio (Círculo)
-                                Polygon circle = new Polygon();
-                                circle.setPoints(Polygon.pointsAsCircle(startPoint, radio));
-                                circle.getFillPaint().setColor(0x220000FF); // Azul transparente
-                                circle.getOutlinePaint().setColor(Color.BLUE);
-                                circle.getOutlinePaint().setStrokeWidth(2);
-                                map.getOverlays().add(circle);
-
-                                map.invalidate(); // Refrescar mapa
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                RetrofitClient.getApiService().actualizarTokenFCM("Bearer " + token, body)
+                        .enqueue(new Callback<BasicResponse>() {
+                            @Override
+                            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                                // No hace falta molestar al usuario si sale bien
                             }
-                        }
-                    }
 
-                    @Override
-                    public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                        Toast.makeText(MainActivity.this, "Error al cargar mapa", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                            @Override
+                            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                            }
+                        });
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Evitar crash si Firebase no está bien configurado
+        }
     }
 
     // Ciclo de vida del Mapa y NFC
     @Override
     public void onResume() {
         super.onResume();
-        if (map != null)
-            map.onResume();
-
         // El if es vital para que el emulador no explote al no tener NFC
         if (nfcAdapter != null && pendingIntent != null) {
             nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
@@ -217,9 +180,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        if (map != null)
-            map.onPause();
-
         if (nfcAdapter != null) {
             nfcAdapter.disableForegroundDispatch(this);
         }
@@ -297,78 +257,6 @@ public class MainActivity extends AppCompatActivity {
                 etIncidencia.setText("");
             }
         });
-
-        btnLogout.setOnClickListener(v -> {
-            sessionManager.logout();
-            irAlLogin();
-        });
-
-        btnChangePassword.setOnClickListener(v -> mostrarDialogoCambioPassword());
-    }
-
-    private void mostrarDialogoCambioPassword() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Cambiar Contraseña");
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 40, 50, 10);
-
-        final EditText inputActual = new EditText(this);
-        inputActual.setHint("Contraseña actual");
-        inputActual.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(inputActual);
-
-        final EditText inputNueva = new EditText(this);
-        inputNueva.setHint("Nueva contraseña");
-        inputNueva.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(inputNueva);
-
-        builder.setView(layout);
-
-        builder.setPositiveButton("Actualizar", (dialog, which) -> {
-            String passActual = inputActual.getText().toString();
-            String passNueva = inputNueva.getText().toString();
-            if (!passActual.isEmpty() && !passNueva.isEmpty()) {
-                ejecutarCambioPassword(passActual, passNueva);
-            } else {
-                Toast.makeText(MainActivity.this, "Campos obligatorios", Toast.LENGTH_SHORT).show();
-            }
-        });
-        builder.setNegativeButton("Cancelar", null);
-        builder.show();
-    }
-
-    private void ejecutarCambioPassword(String actual, String nueva) {
-        String token = sessionManager.fetchAuthToken();
-        Map<String, String> body = new HashMap<>();
-        body.put("current_password", actual);
-        body.put("new_password", nueva);
-
-        RetrofitClient.getApiService().cambiarContrasena("Bearer " + token, body)
-                .enqueue(new Callback<BasicResponse>() {
-                    @Override
-                    public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, "Contraseña actualizada correctamente", Toast.LENGTH_LONG)
-                                    .show();
-                        } else {
-                            if (response.code() == 401) {
-                                Toast.makeText(MainActivity.this, "La contraseña actual no es correcta",
-                                        Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(MainActivity.this, "Error al actualizar: " + response.code(),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<BasicResponse> call, Throwable t) {
-                        Toast.makeText(MainActivity.this, "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_SHORT)
-                                .show();
-                    }
-                });
     }
 
     private void obtenerUbicacionYFichar(String token) {
@@ -420,5 +308,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return horas + "h " + minutos + "min";
+    }
+
+    private void createNotificationChannel() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            CharSequence name = "Recordatorios de Fichaje";
+            String description = "Canal para avisos de olvido de fichaje";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel("CANAL_PRESENCIA", name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }

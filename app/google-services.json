@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "971265810678",
+    "project_id": "controlpresencia2026",
+    "storage_bucket": "controlpresencia2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:971265810678:android:cabe9fc438957e6dcb4cd7",
+        "android_client_info": {
+          "package_name": "com.example.controldepresencia2026"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKWgnf_mle_Q3kzSM8hTY_X5Z0V_jRtZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

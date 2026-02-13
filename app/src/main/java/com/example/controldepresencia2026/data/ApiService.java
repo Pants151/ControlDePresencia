@@ -51,4 +51,10 @@ public interface ApiService {
 
         @POST("api/auth/change-password")
         Call<BasicResponse> cambiarContrasena(@Header("Authorization") String token, @Body Map<String, String> body);
+
+        @POST("api/usuario/actualizar-fcm")
+        Call<BasicResponse> actualizarTokenFCM(@Header("Authorization") String token, @Body Map<String, String> body);
+
+        @POST("api/usuario/logout-fcm")
+        Call<BasicResponse> logoutFCM(@Header("Authorization") String token);
 }

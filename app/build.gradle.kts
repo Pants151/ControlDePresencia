@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -63,4 +64,8 @@ dependencies {
 
     // Mapa OSMDroid (OpenStreetMap para Android)
     implementation("org.osmdroid:osmdroid-android:6.1.18")
+
+    // Firebase Cloud Messaging (FCM)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-messaging")
 }

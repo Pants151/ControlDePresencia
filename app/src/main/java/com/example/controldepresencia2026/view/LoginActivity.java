@@ -112,9 +112,6 @@ public class LoginActivity extends AppCompatActivity {
             sessionManager.saveUserRol(rol);
             sessionManager.setRememberMe(cbRememberMe.isChecked());
 
-            // DEBUG API RESPONSE y JWT DECODED
-            Toast.makeText(this, "API Rol: " + response.getRol() + " | JWT Rol: " + rol, Toast.LENGTH_LONG).show();
-
             Toast.makeText(this, "Bienvenido " + response.getUsuario(), Toast.LENGTH_SHORT).show();
 
             // Ir a la pantalla principal
