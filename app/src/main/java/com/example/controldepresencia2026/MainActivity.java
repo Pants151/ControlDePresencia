@@ -137,7 +137,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Crear el PendingIntent para capturar el tag cuando la app esté abierta
         Intent intent = new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE);
+        pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
         // ACTUALIZAR TOKEN FCM
         try {
@@ -192,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction()) ||
                 NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
 
-            Toast.makeText(this, "NFC Detectado: Procesando fichaje...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Tarjeta NFC detectada. Procesando fichaje...", Toast.LENGTH_SHORT).show();
 
             // Obtenemos el token de la sesión
             String token = sessionManager.fetchAuthToken();

@@ -20,6 +20,7 @@ import retrofit2.Response;
 
 public class AdminActivity extends AppCompatActivity {
     private android.widget.Spinner spEmpleados;
+    private android.widget.TextView tvConfigInfo;
     private RecyclerView recyclerView;
     private SessionManager sessionManager;
 
@@ -31,9 +32,39 @@ public class AdminActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rvRegistrosAdmin);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         spEmpleados = findViewById(R.id.spEmpleados);
+        tvConfigInfo = findViewById(R.id.tvConfigInfo);
         sessionManager = new SessionManager(this);
 
         cargarTrabajadores();
+        cargarConfiguracionEmpresa();
+    }
+
+    private void cargarConfiguracionEmpresa() {
+        String token = sessionManager.fetchAuthToken();
+        if (token == null)
+            return;
+
+        RetrofitClient.getApiService().obtenerConfigEmpresa("Bearer " + token)
+                .enqueue(new Callback<java.util.Map<String, Object>>() {
+                    @Override
+                    public void onResponse(Call<java.util.Map<String, Object>> call,
+                            Response<java.util.Map<String, Object>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            try {
+                                String nombre = (String) response.body().get("nombre");
+                                double radio = ((Number) response.body().get("radio")).doubleValue();
+                                tvConfigInfo.setText("Configuración: " + nombre + " (Radio: " + radio + "m)");
+                            } catch (Exception e) {
+                                tvConfigInfo.setText("Configuración: Error al leer datos");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<java.util.Map<String, Object>> call, Throwable t) {
+                        tvConfigInfo.setText("Configuración: Sin conexión");
+                    }
+                });
     }
 
     private void cargarTrabajadores() {
