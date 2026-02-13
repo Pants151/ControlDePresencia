@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.controldepresencia2026.data.RetrofitClient;
 import com.example.controldepresencia2026.utils.SessionManager;
+import com.example.controldepresencia2026.view.AdminActivity;
 import com.example.controldepresencia2026.view.LoginActivity;
 import com.example.controldepresencia2026.viewmodel.MainViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -58,22 +59,38 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
 
         // Inicializar SessionManager y verificar el token
         sessionManager = new SessionManager(this);
         String token = sessionManager.fetchAuthToken();
+        String rol = sessionManager.fetchUserRol();
+        // DEBUG: Mostrar el rol actual para ver por qué no sale el botón
+        Toast.makeText(this, "Rol detectado: " + rol, Toast.LENGTH_LONG).show();
+
+        Button btnAdmin = findViewById(R.id.btnAdmin);
 
         if (token == null) {
             irAlLogin();
             return;
         }
 
+        if ("Administrador".equals(rol) || "Superadministrador".equals(rol)) {
+            btnAdmin.setVisibility(View.VISIBLE);
+        } else {
+            btnAdmin.setVisibility(View.GONE);
+        }
+
+        btnAdmin.setOnClickListener(v -> {
+            Intent i = new Intent(this, AdminActivity.class);
+            startActivity(i);
+        });
+
         // CONFIGURACIÓN OSMDROID
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-        // Configuración visual y carga del Layout
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        // Ajustar padding para barras de sistema
 
         // Ajustar padding para barras de sistema
         View mainView = findViewById(R.id.main);
@@ -132,55 +149,58 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cargarConfiguracionYMapa(String token) {
-        if (map == null) return;
+        if (map == null)
+            return;
 
-        RetrofitClient.getApiService().obtenerConfigEmpresa("Bearer " + token).enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        double lat = ((Number) response.body().get("lat")).doubleValue();
-                        double lng = ((Number) response.body().get("lng")).doubleValue();
-                        double radio = ((Number) response.body().get("radio")).doubleValue();
+        RetrofitClient.getApiService().obtenerConfigEmpresa("Bearer " + token)
+                .enqueue(new Callback<Map<String, Object>>() {
+                    @Override
+                    public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            try {
+                                double lat = ((Number) response.body().get("lat")).doubleValue();
+                                double lng = ((Number) response.body().get("lng")).doubleValue();
+                                double radio = ((Number) response.body().get("radio")).doubleValue();
 
-                        GeoPoint startPoint = new GeoPoint(lat, lng);
-                        map.getController().setZoom(17.5);
-                        map.getController().setCenter(startPoint);
+                                GeoPoint startPoint = new GeoPoint(lat, lng);
+                                map.getController().setZoom(17.5);
+                                map.getController().setCenter(startPoint);
 
-                        // 1. Añadir Marcador
-                        Marker startMarker = new Marker(map);
-                        startMarker.setPosition(startPoint);
-                        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-                        startMarker.setTitle("Sede de la Empresa");
-                        map.getOverlays().add(startMarker);
+                                // Añadir Marcador
+                                Marker startMarker = new Marker(map);
+                                startMarker.setPosition(startPoint);
+                                startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+                                startMarker.setTitle("Sede de la Empresa");
+                                map.getOverlays().add(startMarker);
 
-                        // 2. Dibujar el Radio (Círculo)
-                        Polygon circle = new Polygon();
-                        circle.setPoints(Polygon.pointsAsCircle(startPoint, radio));
-                        circle.getFillPaint().setColor(0x220000FF); // Azul transparente
-                        circle.getOutlinePaint().setColor(Color.BLUE);
-                        circle.getOutlinePaint().setStrokeWidth(2);
-                        map.getOverlays().add(circle);
+                                // Dibujar el Radio (Círculo)
+                                Polygon circle = new Polygon();
+                                circle.setPoints(Polygon.pointsAsCircle(startPoint, radio));
+                                circle.getFillPaint().setColor(0x220000FF); // Azul transparente
+                                circle.getOutlinePaint().setColor(Color.BLUE);
+                                circle.getOutlinePaint().setStrokeWidth(2);
+                                map.getOverlays().add(circle);
 
-                        map.invalidate(); // Refrescar mapa
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                                map.invalidate(); // Refrescar mapa
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
-                }
-            }
 
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Error al cargar mapa", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                        Toast.makeText(MainActivity.this, "Error al cargar mapa", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     // Ciclo de vida del Mapa y NFC
     @Override
     public void onResume() {
         super.onResume();
-        if (map != null) map.onResume();
+        if (map != null)
+            map.onResume();
 
         // El if es vital para que el emulador no explote al no tener NFC
         if (nfcAdapter != null && pendingIntent != null) {
@@ -191,7 +211,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        if (map != null) map.onPause();
+        if (map != null)
+            map.onPause();
 
         if (nfcAdapter != null) {
             nfcAdapter.disableForegroundDispatch(this);
@@ -210,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
             // Obtenemos el token de la sesión
             String token = sessionManager.fetchAuthToken();
 
-            // Lógica: Si está fichado, hacemos salida. Si no, hacemos entrada.
+            // Si está fichado, hacemos salida. Si no, hacemos entrada.
             if (mainViewModel.getEstado().getValue() != null && mainViewModel.getEstado().getValue().isFichado()) {
                 obtenerUbicacionYFicharSalida(token);
             } else {
@@ -272,8 +293,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void obtenerUbicacionYFichar(String token) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 100);
             return;
         }
 
@@ -287,8 +309,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void obtenerUbicacionYFicharSalida(String token) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 100);
             return;
         }
 
@@ -296,14 +319,17 @@ public class MainActivity extends AppCompatActivity {
             if (location != null) {
                 mainViewModel.ficharSalida(token, location.getLatitude(), location.getLongitude());
             } else {
-                Toast.makeText(this, "No se pudo obtener ubicación. Activa el GPS para salir.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "No se pudo obtener ubicación. Activa el GPS para salir.", Toast.LENGTH_LONG)
+                        .show();
             }
         });
     }
+
     private void irAlLogin() {
         startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
+
     private String formatearHoras(double horasDecimales) {
         int horas = (int) horasDecimales;
         int minutos = (int) Math.round((horasDecimales - horas) * 60);

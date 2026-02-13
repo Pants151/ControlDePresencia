@@ -52,7 +52,23 @@ public class LoginActivity extends AppCompatActivity {
             progressBar.setVisibility(View.GONE);
 
             // Guardar el token JWT y el nombre del usuario de forma segura
-            sessionManager.saveAuthToken(response.getToken(), response.getUsuario());
+            String token = response.getToken();
+            String rol = response.getRol();
+
+            // Si el rol no viene en el JSON directo, lo sacamos del Token
+            if (rol == null) {
+                try {
+                    rol = com.example.controldepresencia2026.utils.JwtUtils.getUserRole(token);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            sessionManager.saveAuthToken(token, response.getUsuario());
+            sessionManager.saveUserRol(rol);
+
+            // DEBUG API RESPONSE y JWT DECODED
+            Toast.makeText(this, "API Rol: " + response.getRol() + " | JWT Rol: " + rol, Toast.LENGTH_LONG).show();
 
             Toast.makeText(this, "Bienvenido " + response.getUsuario(), Toast.LENGTH_SHORT).show();
 

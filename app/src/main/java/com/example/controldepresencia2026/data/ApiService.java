@@ -8,6 +8,7 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
+import java.util.List;
 import java.util.Map;
 
 public interface ApiService {
@@ -25,7 +26,8 @@ public interface ApiService {
 
     // Para incidencias
     @POST("api/incidencias")
-    Call<BasicResponse> registrarIncidencia(@Header("Authorization") String token, @Body java.util.Map<String, String> body);
+    Call<BasicResponse> registrarIncidencia(@Header("Authorization") String token,
+            @Body java.util.Map<String, String> body);
 
     // PARA EL MAPA
     @GET("api/empresa/config")
@@ -34,6 +36,13 @@ public interface ApiService {
     @GET("api/presencia/resumen-mensual")
     Call<ResumenResponse> obtenerResumenMensual(
             @Header("Authorization") String token,
-            @Query("mes") String mes
-    );
+            @Query("mes") String mes);
+
+    @GET("api/admin/registros")
+    Call<List<RegistroAdmin>> obtenerRegistrosAdmin(
+            @Header("Authorization") String token,
+            @Query("id_trabajador") String idTrabajador);
+
+    @GET("api/admin/trabajadores")
+    Call<List<TrabajadorSimple>> obtenerTrabajadores(@Header("Authorization") String token);
 }
