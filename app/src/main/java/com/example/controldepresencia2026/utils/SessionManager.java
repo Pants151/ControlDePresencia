@@ -12,6 +12,7 @@ public class SessionManager {
     private static final String KEY_TOKEN = "jwt_token";
     private static final String KEY_USER_NAME = "user_name"; //
     private static final String USER_ROL = "user_rol";
+    private static final String KEY_REMEMBER_ME = "remember_me";
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
@@ -72,5 +73,18 @@ public class SessionManager {
             return;
         editor.clear();
         editor.apply();
+    }
+
+    public void setRememberMe(boolean remember) {
+        if (editor == null)
+            return;
+        editor.putBoolean(KEY_REMEMBER_ME, remember);
+        editor.apply();
+    }
+
+    public boolean isRememberMe() {
+        if (sharedPreferences == null)
+            return false;
+        return sharedPreferences.getBoolean(KEY_REMEMBER_ME, false);
     }
 }

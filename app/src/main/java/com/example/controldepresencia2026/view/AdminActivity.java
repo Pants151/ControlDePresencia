@@ -103,8 +103,7 @@ public class AdminActivity extends AppCompatActivity {
                             AdminAdapter adapter = new AdminAdapter(response.body());
                             recyclerView.setAdapter(adapter);
                         } else {
-                            // Si devuelve 500 o algo, Toast
-                            // IMPORTANTE: Si el usuario no ha actualizado el backend, fallará aquí.
+                            // Si el usuario no ha actualizado el backend, fallará aquí.
                             Toast.makeText(AdminActivity.this, "Error obteniendo registros: " + response.code(),
                                     Toast.LENGTH_SHORT).show();
                         }

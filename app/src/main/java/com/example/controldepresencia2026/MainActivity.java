@@ -13,6 +13,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.AlertDialog;
+import android.widget.LinearLayout;
+import android.text.InputType;
+import java.util.HashMap;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +27,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.controldepresencia2026.data.RetrofitClient;
+import com.example.controldepresencia2026.model.BasicResponse;
 import com.example.controldepresencia2026.utils.SessionManager;
 import com.example.controldepresencia2026.view.AdminActivity;
 import com.example.controldepresencia2026.view.LoginActivity;
@@ -48,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private FusedLocationProviderClient fusedLocationClient;
     private TextView tvStatus, tvResumen;
-    private Button btnEntrada, btnSalida, btnEnviarIncidencia, btnLogout;
+    private Button btnEntrada, btnSalida, btnEnviarIncidencia, btnLogout, btnChangePassword;
     private EditText etIncidencia;
 
     private MapView map = null;
@@ -111,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         btnEnviarIncidencia = findViewById(R.id.btnEnviarIncidencia);
         etIncidencia = findViewById(R.id.etIncidencia);
         btnLogout = findViewById(R.id.btnLogout);
+        btnChangePassword = findViewById(R.id.btnChangePassword);
 
         // Inicializar el Mapa
         map = findViewById(R.id.map);
@@ -271,7 +277,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mainViewModel.getMensajeExito().observe(this, msg -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
-        mainViewModel.getError().observe(this, err -> Toast.makeText(this, err, Toast.LENGTH_LONG).show());
+        mainViewModel.getError().observe(this, err -> {
+            Toast.makeText(this, err, Toast.LENGTH_LONG).show();
+            if (err.contains("401") || err.contains("No autorizado")) {
+                sessionManager.logout();
+                irAlLogin();
+            }
+        });
     }
 
     private void configurarBotones(String token) {
@@ -290,6 +302,73 @@ public class MainActivity extends AppCompatActivity {
             sessionManager.logout();
             irAlLogin();
         });
+
+        btnChangePassword.setOnClickListener(v -> mostrarDialogoCambioPassword());
+    }
+
+    private void mostrarDialogoCambioPassword() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Cambiar Contraseña");
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        final EditText inputActual = new EditText(this);
+        inputActual.setHint("Contraseña actual");
+        inputActual.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(inputActual);
+
+        final EditText inputNueva = new EditText(this);
+        inputNueva.setHint("Nueva contraseña");
+        inputNueva.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(inputNueva);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Actualizar", (dialog, which) -> {
+            String passActual = inputActual.getText().toString();
+            String passNueva = inputNueva.getText().toString();
+            if (!passActual.isEmpty() && !passNueva.isEmpty()) {
+                ejecutarCambioPassword(passActual, passNueva);
+            } else {
+                Toast.makeText(MainActivity.this, "Campos obligatorios", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Cancelar", null);
+        builder.show();
+    }
+
+    private void ejecutarCambioPassword(String actual, String nueva) {
+        String token = sessionManager.fetchAuthToken();
+        Map<String, String> body = new HashMap<>();
+        body.put("current_password", actual);
+        body.put("new_password", nueva);
+
+        RetrofitClient.getApiService().cambiarContrasena("Bearer " + token, body)
+                .enqueue(new Callback<BasicResponse>() {
+                    @Override
+                    public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(MainActivity.this, "Contraseña actualizada correctamente", Toast.LENGTH_LONG)
+                                    .show();
+                        } else {
+                            if (response.code() == 401) {
+                                Toast.makeText(MainActivity.this, "La contraseña actual no es correcta",
+                                        Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(MainActivity.this, "Error al actualizar: " + response.code(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<BasicResponse> call, Throwable t) {
+                        Toast.makeText(MainActivity.this, "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                });
     }
 
     private void obtenerUbicacionYFichar(String token) {

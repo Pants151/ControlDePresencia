@@ -88,6 +88,14 @@
                     android:inputType="textPassword"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <CheckBox
+                android:id="@+id/cbRememberMe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mantener sesión iniciada"
+                android:layout_gravity="start"
+                android:layout_marginBottom="8dp" />
+
             <Button
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
@@ -104,6 +112,20 @@
                 android:visibility="gone"
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:id="@+id/tvForgotPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:padding="8dp"
+                android:text="¿Olvidaste tu contraseña?"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true" />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
