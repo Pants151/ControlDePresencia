@@ -14,8 +14,13 @@ public class LoginViewModel extends ViewModel {
     private MutableLiveData<LoginResponse> loginResponse = new MutableLiveData<>();
     private MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
-    public LiveData<LoginResponse> getLoginResponse() { return loginResponse; }
-    public LiveData<String> getErrorMessage() { return errorMessage; }
+    public LiveData<LoginResponse> getLoginResponse() {
+        return loginResponse;
+    }
+
+    public LiveData<String> getErrorMessage() {
+        return errorMessage;
+    }
 
     public void login(String email, String password) {
         LoginRequest request = new LoginRequest(email, password);
@@ -31,7 +36,7 @@ public class LoginViewModel extends ViewModel {
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                errorMessage.setValue("Error de conexión: " + t.getMessage());
+                errorMessage.setValue(com.example.controldepresencia2026.utils.ErrorUtils.getFriendlyMessage(t));
             }
         });
     }

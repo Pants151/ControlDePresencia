@@ -20,19 +20,15 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> mensajeExito = new MutableLiveData<>();
     private MutableLiveData<String> error = new MutableLiveData<>();
     private MutableLiveData<ResumenResponse> resumenMensual = new MutableLiveData<>();
-
     public LiveData<EstadoResponse> getEstado() {
         return estado;
     }
-
     public LiveData<String> getMensajeExito() {
         return mensajeExito;
     }
-
     public LiveData<String> getError() {
         return error;
     }
-
     public LiveData<ResumenResponse> getResumenMensual() {
         return resumenMensual;
     }
@@ -48,7 +44,7 @@ public class MainViewModel extends ViewModel {
 
             @Override
             public void onFailure(Call<EstadoResponse> call, Throwable t) {
-                error.setValue("Fallo al consultar estado: " + t.getMessage());
+                error.setValue(com.example.controldepresencia2026.utils.ErrorUtils.getFriendlyMessage(t));
             }
         });
     }
@@ -65,6 +61,7 @@ public class MainViewModel extends ViewModel {
 
                     @Override
                     public void onFailure(Call<ResumenResponse> call, Throwable t) {
+                        error.setValue(com.example.controldepresencia2026.utils.ErrorUtils.getFriendlyMessage(t));
                     }
                 });
     }
@@ -80,13 +77,13 @@ public class MainViewModel extends ViewModel {
                             mensajeExito.setValue(response.body().getMsg());
                             consultarEstado(token);
                         } else {
-                            error.setValue(parsearError(response));
+                            manejarErroresHttp(response);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<BasicResponse> call, Throwable t) {
-                        error.setValue("Fallo de red: " + t.getMessage());
+                        error.setValue(com.example.controldepresencia2026.utils.ErrorUtils.getFriendlyMessage(t));
                     }
                 });
     }
@@ -105,15 +102,30 @@ public class MainViewModel extends ViewModel {
                             consultarEstado(token);
                             consultarResumen(token);
                         } else {
-                            error.setValue(parsearError(response));
+                            manejarErroresHttp(response);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<BasicResponse> call, Throwable t) {
-                        error.setValue("Error de red: " + t.getMessage());
+                        error.setValue(com.example.controldepresencia2026.utils.ErrorUtils.getFriendlyMessage(t));
                     }
                 });
+    }
+
+    private void manejarErroresHttp(Response<?> response) {
+        if (response.code() == 404) {
+            // El empleado ha sido borrado de la base de datos
+            error.setValue("Error crítico: Su cuenta ha sido dada de baja.");
+        } else if (response.code() == 401) {
+            // Token expirado o inválido
+            error.setValue("Sesión expirada. Por favor, entre de nuevo.");
+        } else if (response.code() == 500) {
+            // Error interno del servidor (posible bug o estado inconsistente)
+            error.setValue("Error interno del servidor. Contacte con soporte.");
+        } else {
+            error.setValue(parsearError(response));
+        }
     }
 
     // Enviar Incidencia
@@ -133,12 +145,13 @@ public class MainViewModel extends ViewModel {
 
                     @Override
                     public void onFailure(Call<BasicResponse> call, Throwable t) {
-                        error.setValue("Fallo de red: " + t.getMessage());
+                        error.setValue(com.example.controldepresencia2026.utils.ErrorUtils.getFriendlyMessage(t));
                     }
                 });
 
     }
 
+    // Parsear errores HTTP
     private String parsearError(Response<?> response) {
         try {
             if (response.errorBody() == null)

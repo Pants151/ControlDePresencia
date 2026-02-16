@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvStatus, tvResumen;
     private Button btnEntrada, btnSalida, btnEnviarIncidencia, btnConfig;
     private EditText etIncidencia;
-
     private NfcAdapter nfcAdapter;
     private PendingIntent pendingIntent;
 
@@ -71,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         // Crear canal de notificaciones
         createNotificationChannel();
 
-        // Pedir permiso de notificaciones en Android 13+
+        // Pedir permiso de notificaciones
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -260,6 +259,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Obtener ubicación y fichar
     private void obtenerUbicacionYFichar(String token) {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -276,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Obtener ubicación y fichar salida
     private void obtenerUbicacionYFicharSalida(String token) {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -293,11 +294,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Ir al Login
     private void irAlLogin() {
         startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 
+    // Formatear horas
     private String formatearHoras(double horasDecimales) {
         int horas = (int) horasDecimales;
         int minutos = (int) Math.round((horasDecimales - horas) * 60);
@@ -311,6 +314,7 @@ public class MainActivity extends AppCompatActivity {
         return horas + "h " + minutos + "min";
     }
 
+    // Crear canal de notificaciones
     private void createNotificationChannel() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             CharSequence name = "Recordatorios de Fichaje";

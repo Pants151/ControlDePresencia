@@ -127,6 +127,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    // Recuperar contraseña
     private void ejecutarRecuperacion(String email) {
         Map<String, String> data = new HashMap<>();
         data.put("email", email);

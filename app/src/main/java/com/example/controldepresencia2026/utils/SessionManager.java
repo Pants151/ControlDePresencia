@@ -28,8 +28,7 @@ public class SessionManager {
             editor = sharedPreferences.edit();
         } catch (Exception e) {
             e.printStackTrace();
-            // Fallback para emuladores (usamos otro fichero para evitar conflictos con el
-            // encriptado)
+            // Fallback para emuladores
             sharedPreferences = context.getSharedPreferences(PREF_NAME + "_fallback", Context.MODE_PRIVATE);
             editor = sharedPreferences.edit();
         }
