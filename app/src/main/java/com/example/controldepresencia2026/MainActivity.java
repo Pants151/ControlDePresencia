@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
         // OBSERVADOR PARA EL RESUMEN
         mainViewModel.getResumenMensual().observe(this, resumen -> {
             if (resumen != null) {
-                String trabajadoStr = formatearHoras(resumen.getHorasTrabajadas());
+                String trabajadoStr = formatearHoras(resumen.getHorasReales());
                 String teoricoStr = formatearHoras(resumen.getHorasTeoricas());
                 String extrasStr = formatearHoras(resumen.getHorasExtra());
 

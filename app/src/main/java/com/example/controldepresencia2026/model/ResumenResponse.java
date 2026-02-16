@@ -7,8 +7,8 @@ public class ResumenResponse {
     @SerializedName("mes")
     private String mes;
 
-    @SerializedName("horas_trabajadas")
-    private double horasTrabajadas;
+    @SerializedName("horas_reales")
+    private double horasReales;
 
     @SerializedName("horas_teoricas")
     private double horasTeoricas;
@@ -17,15 +17,16 @@ public class ResumenResponse {
     private double horasExtra;
 
     // Constructor vacío requerido por GSON
-    public ResumenResponse() {}
+    public ResumenResponse() {
+    }
 
     // Getters
     public String getMes() {
         return mes;
     }
 
-    public double getHorasTrabajadas() {
-        return horasTrabajadas;
+    public double getHorasReales() {
+        return horasReales;
     }
 
     public double getHorasTeoricas() {
@@ -41,8 +42,8 @@ public class ResumenResponse {
         this.mes = mes;
     }
 
-    public void setHorasTrabajadas(double horasTrabajadas) {
-        this.horasTrabajadas = horasTrabajadas;
+    public void setHorasReales(double horasReales) {
+        this.horasReales = horasReales;
     }
 
     public void setHorasTeoricas(double horasTeoricas) {

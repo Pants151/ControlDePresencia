@@ -1,6 +1,14 @@
 package com.example.controldepresencia2026.data;
 
-import com.example.controldepresencia2026.model.*;
+import com.example.controldepresencia2026.model.BasicResponse;
+import com.example.controldepresencia2026.model.EstadoResponse;
+import com.example.controldepresencia2026.model.GeoResponse;
+import com.example.controldepresencia2026.model.LocationData;
+import com.example.controldepresencia2026.model.LoginRequest;
+import com.example.controldepresencia2026.model.LoginResponse;
+import com.example.controldepresencia2026.model.RegistroAdmin;
+import com.example.controldepresencia2026.model.ResumenResponse;
+import com.example.controldepresencia2026.model.TrabajadorSimple;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -42,6 +50,12 @@ public interface ApiService {
         Call<List<RegistroAdmin>> obtenerRegistrosAdmin(
                         @Header("Authorization") String token,
                         @Query("id_trabajador") String idTrabajador);
+
+        @GET("api/admin/registros-recientes")
+        Call<List<RegistroAdmin>> getRegistrosRecientes(@Header("Authorization") String token);
+
+        @GET("api/empresa/configuracion-geo")
+        Call<GeoResponse> getGeoConfig(@Header("Authorization") String token);
 
         @GET("api/admin/trabajadores")
         Call<List<TrabajadorSimple>> obtenerTrabajadores(@Header("Authorization") String token);
