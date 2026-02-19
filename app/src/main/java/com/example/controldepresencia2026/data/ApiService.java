@@ -41,6 +41,11 @@ public interface ApiService {
         @GET("api/empresa/config")
         Call<Map<String, Object>> obtenerConfigEmpresa(@Header("Authorization") String token);
 
+        @POST("api/empresa/config")
+        Call<BasicResponse> actualizarConfigEmpresa(
+                        @Header("Authorization") String token,
+                        @Body Map<String, Object> body);
+
         @GET("api/presencia/resumen-mensual")
         Call<ResumenResponse> obtenerResumenMensual(
                         @Header("Authorization") String token,
@@ -71,4 +76,13 @@ public interface ApiService {
 
         @POST("api/usuario/logout-fcm")
         Call<BasicResponse> logoutFCM(@Header("Authorization") String token);
+
+        // OBTENER FICHAJES DEL USUARIO ACTUAL
+        @GET("api/mis-registros")
+        Call<List<RegistroAdmin>> getMisRegistros(@Header("Authorization") String token);
+
+        // OBTENER TODOS LOS TRABAJADORES (Alias para mantener consistencia con el
+        // snippet del usuario)
+        @GET("api/admin/trabajadores")
+        Call<List<TrabajadorSimple>> getTrabajadores(@Header("Authorization") String token);
 }
