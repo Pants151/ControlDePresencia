@@ -37,95 +37,93 @@
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_gravity="center"
-                android:src="@android:drawable/ic_lock_lock"
                 android:layout_marginBottom="16dp"
+                android:src="@android:drawable/ic_lock_lock"
                 app:tint="@color/primary" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bienvenido"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="@color/on_surface"
                 android:layout_gravity="center"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8dp"
+                android:text="Bienvenido"
+                android:textColor="@color/on_surface"
+                android:textSize="28sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Accede a tu jornada laboral"
-                android:textColor="#7F8C8D"
                 android:layout_gravity="center"
-                android:layout_marginBottom="32dp"/>
+                android:layout_marginBottom="32dp"
+                android:text="Accede a tu jornada laboral"
+                android:textColor="#7F8C8D" />
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email o NIF"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="12dp"
+                android:hint="Email o NIF">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"/>
+                    android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 android:hint="Contraseña"
-                app:passwordToggleEnabled="true"
-                android:layout_marginBottom="24dp">
+                app:passwordToggleEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword"/>
+                    android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <CheckBox
                 android:id="@+id/cbRememberMe"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mantener sesión iniciada"
                 android:layout_gravity="start"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="8dp"
+                android:text="Mantener sesión iniciada" />
 
             <Button
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="Iniciar Sesión"
                 android:backgroundTint="@color/primary"
+                android:text="Iniciar Sesión"
                 android:textColor="@color/white"
-                app:cornerRadius="12dp"/>
+                app:cornerRadius="12dp" />
 
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:layout_gravity="center"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/tvForgotPassword"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center"
                 android:layout_marginTop="20dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:padding="8dp"
                 android:text="¿Olvidaste tu contraseña?"
                 android:textColor="@color/black"
                 android:textSize="14sp"
-                android:textStyle="bold"
-                android:clickable="true"
-                android:focusable="true" />
+                android:textStyle="bold" />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

@@ -136,8 +136,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(LoginActivity.this, "Si el email existe, recibirás una clave en segundos",
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, "Si el email existe, recibirás un correo con el enlace.", Toast.LENGTH_LONG).show();
                 } else {
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string()
