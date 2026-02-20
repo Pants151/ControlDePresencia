@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:gravity="center_vertical">
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@android:drawable/ic_menu_manage"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"/>
+
+    <Button
+        android:id="@+id/btnMisFichajes"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Ver Mis Fichajes"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnAdminConfig"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Panel de Administración"
+        android:backgroundTint="#455A64"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnChangePasswordConfig"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Cambiar Contraseña"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnLogoutConfig"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Cerrar Sesión"
+        android:backgroundTint="#E74C3C"
+        android:textColor="@android:color/white"/>
+
+</LinearLayout>
