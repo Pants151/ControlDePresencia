@@ -95,6 +95,10 @@ public class AdminActivity extends AppCompatActivity {
                                 double lng = ((Number) response.body().get("lng")).doubleValue();
                                 double radio = ((Number) response.body().get("radio")).doubleValue();
 
+                                // AÑADE ESTAS DOS LÍNEAS PARA MOSTRAR LAS COORDENADAS:
+                                ((android.widget.TextView) findViewById(R.id.tvLatAdmin)).setText("Latitud: " + lat);
+                                ((android.widget.TextView) findViewById(R.id.tvLngAdmin)).setText("Longitud: " + lng);
+
                                 GeoPoint startPoint = new GeoPoint(lat, lng);
                                 map.getController().setZoom(17.5);
                                 map.getController().setCenter(startPoint);
