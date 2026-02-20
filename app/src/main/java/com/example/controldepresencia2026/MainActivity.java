@@ -83,11 +83,6 @@ public class MainActivity extends AppCompatActivity {
         String token = sessionManager.fetchAuthToken();
         String rol = sessionManager.fetchUserRol();
 
-        // CONFIGURACIÓN OSMDROID NO NECESARIA AQUI YA
-        // Configuration.getInstance().load(...) se movió a ConfigActivity
-
-        // Ajustar padding para barras de sistema
-
         // Ajustar padding para barras de sistema
         View mainView = findViewById(R.id.main);
         if (mainView != null) {

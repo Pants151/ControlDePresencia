@@ -81,8 +81,7 @@ public interface ApiService {
         @GET("api/mis-registros")
         Call<List<RegistroAdmin>> getMisRegistros(@Header("Authorization") String token);
 
-        // OBTENER TODOS LOS TRABAJADORES (Alias para mantener consistencia con el
-        // snippet del usuario)
+        // OBTENER TODOS LOS TRABAJADORES
         @GET("api/admin/trabajadores")
         Call<List<TrabajadorSimple>> getTrabajadores(@Header("Authorization") String token);
 }

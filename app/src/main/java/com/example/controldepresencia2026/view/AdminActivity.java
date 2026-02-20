@@ -78,9 +78,8 @@ public class AdminActivity extends AppCompatActivity {
                     });
         });
 
-        // 2. Navegación a las otras pantallas
+        // Navegación a las otras pantallas
         btnVerEmpleados.setOnClickListener(v -> startActivity(new Intent(this, AdminEmpleadosActivity.class)));
-        // Este es el que has renombrado en el Paso 1
         btnVerRegistros.setOnClickListener(v -> startActivity(new Intent(this, AdminRegistrosActivity.class)));
     }
 
@@ -95,7 +94,6 @@ public class AdminActivity extends AppCompatActivity {
                                 double lng = ((Number) response.body().get("lng")).doubleValue();
                                 double radio = ((Number) response.body().get("radio")).doubleValue();
 
-                                // AÑADE ESTAS DOS LÍNEAS PARA MOSTRAR LAS COORDENADAS:
                                 ((android.widget.TextView) findViewById(R.id.tvLatAdmin)).setText("Latitud: " + lat);
                                 ((android.widget.TextView) findViewById(R.id.tvLngAdmin)).setText("Longitud: " + lng);
 
