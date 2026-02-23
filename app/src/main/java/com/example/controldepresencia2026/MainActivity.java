@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText etIncidencia;
     private NfcAdapter nfcAdapter;
     private PendingIntent pendingIntent;
+    private long ultimoFichajeTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,20 +186,67 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
 
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction()) ||
-                NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+                NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction()) ||
+                NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())) {
 
-            Toast.makeText(this, "Tarjeta NFC detectada. Procesando fichaje...", Toast.LENGTH_SHORT).show();
+            // Extraemos la tarjeta NFC leída
+            android.nfc.Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
-            // Obtenemos el token de la sesión
-            String token = sessionManager.fetchAuthToken();
+            if (tag != null) {
+                // Convertimos su ID a texto hexadecimal
+                String idTarjetaLeida = bytesToHex(tag.getId());
 
-            // Si está fichado, hacemos salida. Si no, hacemos entrada.
-            if (mainViewModel.getEstado().getValue() != null && mainViewModel.getEstado().getValue().isFichado()) {
-                obtenerUbicacionYFicharSalida(token);
-            } else {
-                obtenerUbicacionYFichar(token);
+                // Comprobamos si ya tenemos una tarjeta guardada en las preferencias
+                android.content.SharedPreferences prefs = android.preference.PreferenceManager.getDefaultSharedPreferences(this);
+                String idGuardado = prefs.getString("NFC_ID_OFICIAL", null);
+
+                if (idGuardado == null) {
+                    // Es la primera vez que se lee una tarjeta. La guardamos.
+                    prefs.edit().putString("NFC_ID_OFICIAL", idTarjetaLeida).apply();
+                    Toast.makeText(this, "NFC Vinculado Exitosamente. Ya puedes fichar.", Toast.LENGTH_LONG).show();
+                } else {
+                    // Ya hay una tarjeta guardada, comprobamos si coincide
+                    if (idTarjetaLeida.equals(idGuardado)) {
+                        // Si la tarjeta es correcta, fichamos (SOLO SI PASÓ 1 MINUTO)
+                        if (puedeFichar()) {
+                            Toast.makeText(this, "NFC Reconocido. Procesando fichaje...", Toast.LENGTH_SHORT).show();
+
+                            String token = sessionManager.fetchAuthToken();
+                            if (mainViewModel.getEstado().getValue() != null && mainViewModel.getEstado().getValue().isFichado()) {
+                                obtenerUbicacionYFicharSalida(token);
+                            } else {
+                                obtenerUbicacionYFichar(token);
+                            }
+                        }
+                    } else {
+                        // Si la tarjeta es otra, rechazamos
+                        Toast.makeText(this, "Tarjeta no autorizada. Usa la tarjeta original.", Toast.LENGTH_LONG).show();
+                    }
+                }
             }
         }
+    }
+
+    // Función auxiliar para convertir los bytes del NFC a texto (Mantenla)
+    private String bytesToHex(byte[] bytes) {
+        if (bytes == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    // Método para evitar que el usuario fiche repetidamente por accidente
+    private boolean puedeFichar() {
+        long tiempoActual = System.currentTimeMillis();
+        // 60000 milisegundos = 1 minuto
+        if (tiempoActual - ultimoFichajeTime < 60000) {
+            Toast.makeText(this, "Por favor, espera un minuto entre fichajes.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        ultimoFichajeTime = tiempoActual;
+        return true;
     }
 
     private void configurarObservadores() {
@@ -242,8 +290,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configurarBotones(String token) {
-        btnEntrada.setOnClickListener(v -> obtenerUbicacionYFichar(token));
-        btnSalida.setOnClickListener(v -> obtenerUbicacionYFicharSalida(token));
+        btnEntrada.setOnClickListener(v -> {
+            if (puedeFichar()) obtenerUbicacionYFichar(token);
+        });
+
+        btnSalida.setOnClickListener(v -> {
+            if (puedeFichar()) obtenerUbicacionYFicharSalida(token);
+        });
 
         btnEnviarIncidencia.setOnClickListener(v -> {
             String desc = etIncidencia.getText().toString().trim();

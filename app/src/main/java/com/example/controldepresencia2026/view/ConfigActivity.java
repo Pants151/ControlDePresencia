@@ -79,7 +79,6 @@ public class ConfigActivity extends AppCompatActivity {
     private void cerrarSesionTotal() {
         String token = sessionManager.fetchAuthToken();
 
-        // Avisamos al servidor para que borre el Token FCM
         // Si no hay token o ya expiró, cerramos local directamente
         if (token == null) {
             sessionManager.logout();
@@ -87,17 +86,35 @@ public class ConfigActivity extends AppCompatActivity {
             return;
         }
 
+        // Avisamos al servidor para que borre el Token FCM de notificaciones
         RetrofitClient.getApiService().logoutFCM("Bearer " + token).enqueue(new Callback<BasicResponse>() {
             @Override
             public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
-                // 2. Independientemente de si el servidor responde o no, cerramos local
+                // Destruimos el Token JWT en la lista negra del servidor
+                quemarTokenServidor(token);
+            }
+
+            @Override
+            public void onFailure(Call<BasicResponse> call, Throwable t) {
+                // Si falla, intentamos quemar el token de todas formas
+                quemarTokenServidor(token);
+            }
+        });
+    }
+
+    // MÉTODO PARA DESTRUIR EL JWT
+    private void quemarTokenServidor(String token) {
+        RetrofitClient.getApiService().logoutServidor("Bearer " + token).enqueue(new Callback<BasicResponse>() {
+            @Override
+            public void onResponse(Call<BasicResponse> call, Response<BasicResponse> response) {
+                // El servidor ha bloqueado el token. Borramos datos locales y salimos.
                 sessionManager.logout();
                 irAlLogin();
             }
 
             @Override
             public void onFailure(Call<BasicResponse> call, Throwable t) {
-                // Si falla la red, cerramos igual por seguridad
+                // Si no hay red, forzamos salida local.
                 sessionManager.logout();
                 irAlLogin();
             }
